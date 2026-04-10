@@ -19,5 +19,7 @@
 
   <!-- Info badge -->
   <circle cx="96" cy="96" r="20" fill="#22863A"/>
-  <text x="96" y="104" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">i</text>
+  <!-- "i" drawn as paths: dot + stem -->
+  <circle cx="96" cy="84" r="3.5" fill="white"/>
+  <rect x="93" y="91" width="6" height="16" rx="2" fill="white"/>
 </svg>
