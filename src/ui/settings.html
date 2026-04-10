@@ -499,31 +499,6 @@
     </div>
 
     <div class="settings-body">
-      <!-- GitHub Personal Access Token Section -->
-      <div class="settings-section">
-        <h2 class="section-title">GitHub Personal Access Token</h2>
-        <div class="form-group">
-          <label for="githubToken" class="form-label">Personal Access Token</label>
-          <p class="form-description">
-            Optional: Provide a GitHub Personal Access Token to increase API rate limits (60 → 5000 requests/hour).
-            Create a token with minimal permissions at <a href="https://github.com/settings/tokens" target="_blank" style="color: inherit; text-decoration: underline;">github.com/settings/tokens</a>
-          </p>
-          <input
-            type="password"
-            id="githubToken"
-            class="form-input"
-            placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-            autocomplete="off"
-          />
-          <div class="security-warning">
-            <div class="security-warning-icon">⚠️</div>
-            <div class="security-warning-text">
-              <strong>Security Notice:</strong> Your Personal Access Token is <strong>stored locally in plaintext</strong> on your device. For security, create a token with <strong>minimal permissions</strong> (read-only access to public repositories). <strong>Never share this token.</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Display Mode Section -->
       <div class="settings-section">
         <h2 class="section-title">Display Mode</h2>
@@ -622,6 +597,34 @@
           <p class="form-description" style="margin-top: 8px;">
             Clear all cached repository data. This will free up storage space but may slow down initial page loads.
           </p>
+        </div>
+      </div>
+
+      <!-- GitHub Personal Access Token Section (Advanced) -->
+      <div class="settings-section">
+        <h2 class="section-title">GitHub Personal Access Token (Optional)</h2>
+        <div class="form-group">
+          <label for="githubToken" class="form-label">Personal Access Token</label>
+          <p class="form-description">
+            <strong>Only needed for heavy usage.</strong> Without a token, you get 60 requests/hour which is sufficient for normal browsing.
+            Providing a token increases this to 5,000 requests/hour.
+            <br><br>
+            Create a token with <strong>no permissions</strong> (public read-only) at
+            <a href="https://github.com/settings/tokens" target="_blank" style="color: inherit; text-decoration: underline;">github.com/settings/tokens</a>
+          </p>
+          <input
+            type="password"
+            id="githubToken"
+            class="form-input"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (optional)"
+            autocomplete="off"
+          />
+          <div class="security-warning">
+            <div class="security-warning-icon">ℹ️</div>
+            <div class="security-warning-text">
+              Your token is stored locally on your device and only used to authenticate with GitHub's API.
+            </div>
+          </div>
         </div>
       </div>
     </div>

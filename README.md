@@ -1,22 +1,38 @@
 # GitHub Quick Metadata
 
-Quick access to GitHub repository metadata via browser extension and userscript. Get instant insights about any repository including creation date, first commit, commit statistics, and activity trends - all without leaving the page.
+Display GitHub repository metadata directly in the About section. View creation date, update time, and 25+ customizable fields - all without leaving the page.
 
 ## Features
 
-- **Repository Timeline**: View creation date, first commit date, and last update timestamp
-- **Commit Statistics**: Analyze commit activity over the past year with visual charts
-- **Activity Trends**: Detect whether a repository is increasing, decreasing, or stable in activity
-- **Weekly Commit Visualization**: Interactive 52-week commit activity chart
-- **Repository Metrics**: Stars, forks, size, open issues, and primary language at a glance
-- **Smart Caching**: localStorage-based caching with TTL and LRU eviction to minimize API calls
-- **GitHub API Integration**: Optional Personal Access Token support to increase rate limits
-- **SPA Navigation Support**: Works seamlessly with GitHub's Turbo framework for client-side navigation
+- **Configurable Fields**: Choose from 25+ metadata fields across 4 categories (dates, metrics, info, flags)
+- **Default Display**: Shows repository creation date and last update time by default
+- **About Section Integration**: Metadata appears natively in GitHub's About sidebar
+- **Popup & Panel Views**: Quick popup or full side panel for detailed information
+- **Smart Caching**: Local caching with automatic expiration to minimize API calls
+- **SPA Navigation Support**: Works seamlessly with GitHub's Turbo framework
 - **Multiple Installation Methods**: Available as Chrome/Firefox extension or userscript
+
+### Optional: GitHub Personal Access Token
+
+**Only needed for heavy usage.** Without a token, you get 60 API requests/hour which is sufficient for normal browsing. Providing a token increases this to 5,000 requests/hour. See [Configuration](#configuration) below.
 
 ## Screenshots
 
-_Screenshots will be added here - please add them after installation_
+### Metadata Display on GitHub Repository
+
+![Metadata in About Section](screenshots/about-section.png)
+*Repository metadata displayed directly in GitHub's native About section*
+
+### Settings Page - Field Configuration
+
+![Settings Page](screenshots/settings-page.png)
+*Configure which metadata fields to display - choose from 25+ fields across 4 categories*
+
+> **Note**: To create these screenshots:
+> 1. Load the extension: `npm run build && load dist/chrome in chrome://extensions`
+> 2. Visit any GitHub repo (e.g., https://github.com/facebook/react)
+> 3. Screenshot 1: Capture the About section showing the metadata
+> 4. Screenshot 2: Click extension icon → Settings, capture the "Displayed Fields" section
 
 ## Installation
 
@@ -97,46 +113,52 @@ Requires a userscript manager like:
 
 1. **Navigate to any GitHub repository** (e.g., https://github.com/facebook/react)
 
-2. **Extension users**: Click the extension icon in your browser toolbar to view metadata in a popup, or click "Open in Panel" for a side panel view
+2. **View metadata** - Automatically displayed in GitHub's About section sidebar:
+   - **Default**: Creation date and last update time
+   - **Customizable**: Configure which fields to show in Settings
 
-3. **Userscript users**: A "Repo Metadata" toggle button will appear on the page. Click it to open the side panel
+3. **Extension users**:
+   - Click the extension icon for a quick popup view
+   - Click "Open in Panel" for a full side panel view
+   - Access Settings to customize displayed fields
 
-4. **View metadata**:
-   - **Repository Info**: Creation date, first commit, last update
-   - **Commit Statistics**: Total commits (past year), average per week, peak week, trend
-   - **Visual Chart**: 52-week commit activity visualization
-   - **Additional Metrics**: Repository size, stars, forks, open issues, language
+4. **Userscript users**: A "Repo Metadata" toggle button will appear on the page
 
-5. **Navigate between repositories**: The extension automatically updates when you navigate to different repositories using GitHub's built-in navigation
+5. **Navigate between repositories**: Metadata automatically updates when you navigate to different repos
 
-## GitHub API Rate Limits
+## Configuration
 
-GitHub's REST API has the following rate limits:
+### Displayed Fields
 
-- **Unauthenticated requests**: 60 requests per hour per IP address
-- **Authenticated requests**: 5,000 requests per hour per user
+Customize which metadata fields to show:
 
-This extension caches API responses for 1 hour to minimize API calls. For heavy usage, we recommend setting up a Personal Access Token.
+1. Click the extension icon → Settings (gear icon)
+2. Scroll to "Displayed Fields" section
+3. Choose from 25+ fields in 4 categories:
+   - **Date Fields**: Created, Updated, Last Push
+   - **Metrics**: Stars, Forks, Size, Open Issues, Watchers, etc.
+   - **Information**: Language, License, Description, Homepage
+   - **Flags**: Archived, Fork, Has Issues, Has Wiki, etc.
 
-### Personal Access Token Setup
+### GitHub Personal Access Token (Optional)
 
-A Personal Access Token (PAT) increases your API rate limit from 60 to 5,000 requests per hour.
+**Only needed for heavy usage.** GitHub allows 60 API requests/hour without authentication, which is sufficient for normal browsing. A Personal Access Token increases this to 5,000 requests/hour.
+
+**To set up a token (if needed):**
 
 1. **Generate a token**:
-   - Go to GitHub Settings → [Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
+   - Go to [GitHub Settings → Personal access tokens](https://github.com/settings/tokens)
    - Click "Generate new token (classic)"
-   - Give it a descriptive name (e.g., "GitHub Quick Metadata Extension")
-   - **No scopes/permissions needed** - leave all checkboxes unchecked for a read-only token
-   - Click "Generate token"
-   - **Copy the token immediately** - you won't be able to see it again
+   - Give it a name (e.g., "GitHub Quick Metadata")
+   - **No permissions needed** - leave all checkboxes unchecked (public read-only)
+   - Click "Generate token" and copy it immediately
 
-2. **Configure the extension**:
-   - **Extension users**: Click the extension icon → Settings → paste token into "GitHub Personal Access Token" field
-   - **Userscript users**: The settings panel can be accessed via the extension's options (implementation pending)
+2. **Add to extension**:
+   - Click extension icon → Settings
+   - Scroll to "GitHub Personal Access Token (Optional)"
+   - Paste token and it will be saved locally
 
-3. **Save**: The token is saved locally and used for all subsequent API requests
-
-**SECURITY WARNING**: Your Personal Access Token is stored in **plaintext** in your browser's localStorage. While the token has no write permissions, anyone with access to your browser's storage can read it. Use this feature only on trusted devices. Never share your token or commit it to version control.
+**Note**: Your token is stored locally on your device and only used to authenticate with GitHub's API.
 
 ## Development
 
