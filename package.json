@@ -1,0 +1,26 @@
+{
+  "name": "github-quick-metadata",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Quick access to GitHub repository metadata via browser extension and userscript",
+  "scripts": {
+    "build": "npm run build:all && npm run build:icons",
+    "build:all": "npm run build:chrome && npm run build:firefox && npm run build:userscript",
+    "build:chrome": "NODE_ENV=production rollup -c --environment TARGET:chrome",
+    "build:firefox": "NODE_ENV=production rollup -c --environment TARGET:firefox",
+    "build:userscript": "NODE_ENV=production rollup -c --environment TARGET:userscript",
+    "build:icons": "node scripts/create-simple-icons.js",
+    "clean": "rm -rf dist/",
+    "rebuild": "npm run clean && npm run build",
+    "lint": "eslint src/**/*.js",
+    "dev": "rollup -c -w"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-terser": "^1.0.0",
+    "eslint": "^8.0.0",
+    "rollup": "^3.0.0"
+  },
+  "license": "MIT"
+}

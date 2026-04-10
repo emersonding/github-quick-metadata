@@ -1,0 +1,25 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "webextensions": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "GM_xmlhttpRequest": "readonly",
+    "GM_getValue": "readonly",
+    "GM_setValue": "readonly",
+    "GM_addStyle": "readonly",
+    "unsafeWindow": "readonly"
+  },
+  "rules": {
+    "no-console": "warn",
+    "no-unused-vars": "warn",
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"]
+  }
+}

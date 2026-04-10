@@ -1,0 +1,566 @@
+/**
+ * GitHub Quick Metadata - Side Panel Styles
+ * GitHub-like design with smooth animations
+ */
+
+/* Panel Container */
+.gqm-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: #ffffff;
+  border-left: 1px solid #d0d7de;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  transform: translateX(100%);
+  transition: transform 280ms cubic-bezier(0.33, 1, 0.68, 1);
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+}
+
+.gqm-panel.gqm-panel-open {
+  transform: translateX(0);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .gqm-panel {
+    background: #0d1117;
+    border-left-color: #30363d;
+    color: #c9d1d9;
+  }
+}
+
+/* Toggle Button */
+.gqm-toggle-btn {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background: #0969da;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px 0 0 6px;
+  padding: 12px 8px;
+  cursor: pointer;
+  z-index: 10000;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.12);
+  transition: background 150ms ease, transform 150ms ease;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.gqm-toggle-btn:hover {
+  background: #0860ca;
+  transform: translateY(-50%) translateX(-2px);
+}
+
+.gqm-toggle-btn:active {
+  background: #0757ba;
+}
+
+.gqm-panel-open + .gqm-toggle-btn {
+  right: 320px;
+  border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-toggle-btn {
+    background: #1f6feb;
+  }
+
+  .gqm-toggle-btn:hover {
+    background: #388bfd;
+  }
+}
+
+/* Panel Header */
+.gqm-panel-header {
+  padding: 16px;
+  border-bottom: 1px solid #d0d7de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-panel-header {
+    border-bottom-color: #30363d;
+    background: #0d1117;
+  }
+}
+
+.gqm-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-panel-title {
+    color: #e6edf3;
+  }
+}
+
+.gqm-close-btn {
+  background: none;
+  border: none;
+  color: #57606a;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 6px;
+  transition: background 150ms ease;
+}
+
+.gqm-close-btn:hover {
+  background: #f6f8fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-close-btn {
+    color: #7d8590;
+  }
+
+  .gqm-close-btn:hover {
+    background: #21262d;
+  }
+}
+
+/* Panel Content */
+.gqm-panel-content {
+  padding: 16px;
+}
+
+/* Section */
+.gqm-section {
+  margin-bottom: 24px;
+}
+
+.gqm-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-section-title {
+    color: #7d8590;
+  }
+}
+
+/* Metadata Item */
+.gqm-meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.gqm-meta-item:last-child {
+  border-bottom: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-meta-item {
+    border-bottom-color: #21262d;
+  }
+}
+
+.gqm-meta-label {
+  font-size: 14px;
+  color: #57606a;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-meta-label {
+    color: #7d8590;
+  }
+}
+
+.gqm-meta-value {
+  font-size: 14px;
+  color: #1f2328;
+  text-align: right;
+  flex: 1;
+  margin-left: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-meta-value {
+    color: #e6edf3;
+  }
+}
+
+.gqm-meta-value-muted {
+  color: #57606a;
+  font-size: 13px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-meta-value-muted {
+    color: #7d8590;
+  }
+}
+
+/* Loading Skeleton */
+.gqm-skeleton {
+  background: linear-gradient(90deg, #f6f8fa 25%, #eaeef2 50%, #f6f8fa 75%);
+  background-size: 200% 100%;
+  animation: gqm-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  height: 16px;
+  margin: 8px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-skeleton {
+    background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%);
+    background-size: 200% 100%;
+  }
+}
+
+@keyframes gqm-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.gqm-skeleton-line {
+  height: 16px;
+  margin-bottom: 12px;
+}
+
+.gqm-skeleton-line:last-child {
+  width: 60%;
+}
+
+/* Error State */
+.gqm-error {
+  padding: 16px;
+  background: #fff8c5;
+  border: 1px solid #d4a72c;
+  border-radius: 6px;
+  margin: 16px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-error {
+    background: #3d2c00;
+    border-color: #6c4400;
+  }
+}
+
+.gqm-error-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+  margin: 0 0 8px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-error-title {
+    color: #e6edf3;
+  }
+}
+
+.gqm-error-message {
+  font-size: 13px;
+  color: #57606a;
+  margin: 0 0 12px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-error-message {
+    color: #9e6a03;
+  }
+}
+
+.gqm-retry-btn {
+  background: #0969da;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.gqm-retry-btn:hover {
+  background: #0860ca;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-retry-btn {
+    background: #1f6feb;
+  }
+
+  .gqm-retry-btn:hover {
+    background: #388bfd;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .gqm-panel {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .gqm-panel-open + .gqm-toggle-btn {
+    right: 320px;
+  }
+}
+
+@media (max-height: 600px) {
+  .gqm-panel-header {
+    padding: 12px 16px;
+  }
+
+  .gqm-panel-content {
+    padding: 12px 16px;
+  }
+
+  .gqm-section {
+    margin-bottom: 16px;
+  }
+}
+
+/* Stats Section */
+.gqm-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.gqm-stat-label {
+  font-size: 13px;
+  color: #57606a;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-stat-label {
+    color: #7d8590;
+  }
+}
+
+.gqm-stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2328;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-stat-value {
+    color: #e6edf3;
+  }
+}
+
+/* Trend Indicator */
+.gqm-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.gqm-trend-increasing {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+.gqm-trend-decreasing {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+.gqm-trend-stable {
+  background: #ddf4ff;
+  color: #0969da;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-trend-increasing {
+    background: #033a16;
+    color: #4ac26b;
+  }
+
+  .gqm-trend-decreasing {
+    background: #490202;
+    color: #ff7b72;
+  }
+
+  .gqm-trend-stable {
+    background: #033d8b;
+    color: #79c0ff;
+  }
+}
+
+/* Commit Chart (CSS-only visualization) */
+.gqm-commit-chart {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-commit-chart {
+    background: #161b22;
+    border-color: #30363d;
+  }
+}
+
+.gqm-chart-table {
+  width: 100%;
+  height: 80px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gqm-chart-table tbody {
+  display: block;
+  height: 100%;
+}
+
+.gqm-chart-table tr {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  gap: 2px;
+}
+
+.gqm-chart-table td {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  min-width: 0;
+}
+
+.gqm-chart-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 2px;
+  transition: opacity 150ms ease, transform 150ms ease;
+  cursor: pointer;
+}
+
+.gqm-chart-bar:hover {
+  opacity: 0.8;
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+}
+
+/* GitHub-style green color scale */
+.gqm-bar-empty {
+  background: #ebedf0;
+  min-height: 2px;
+}
+
+.gqm-bar-low {
+  background: #9be9a8;
+}
+
+.gqm-bar-med {
+  background: #40c463;
+}
+
+.gqm-bar-med-high {
+  background: #30a14e;
+}
+
+.gqm-bar-high {
+  background: #216e39;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-bar-empty {
+    background: #161b22;
+  }
+
+  .gqm-bar-low {
+    background: #0e4429;
+  }
+
+  .gqm-bar-med {
+    background: #006d32;
+  }
+
+  .gqm-bar-med-high {
+    background: #26a641;
+  }
+
+  .gqm-bar-high {
+    background: #39d353;
+  }
+}
+
+/* Rate Limit Display */
+.gqm-panel-footer,
+.gqm-popup-footer {
+  padding: 12px 16px;
+  border-top: 1px solid #d0d7de;
+  margin-top: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-panel-footer,
+  .gqm-popup-footer {
+    border-top-color: #30363d;
+  }
+}
+
+.gqm-rate-limit {
+  font-size: 12px;
+  color: #57606a;
+  text-align: center;
+  padding: 8px;
+  background: #f6f8fa;
+  border-radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-rate-limit {
+    color: #7d8590;
+    background: #161b22;
+  }
+}
+
+.gqm-rate-limit-low {
+  background: #fff8c5;
+  color: #9a6700;
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gqm-rate-limit-low {
+    background: #3d2c00;
+    color: #f0c860;
+  }
+}

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=400, initial-scale=1.0">
+  <title>GitHub Quick Metadata</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 400px;
+      height: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #1f2328;
+      overflow-y: auto;
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #0d1117;
+        color: #c9d1d9;
+      }
+    }
+
+    /* Popup Header */
+    .gqm-popup-header {
+      padding: 16px;
+      border-bottom: 1px solid #d0d7de;
+      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-popup-header {
+        border-bottom-color: #30363d;
+        background: #0d1117;
+      }
+    }
+
+    .gqm-popup-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .gqm-popup-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+      margin: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-popup-title {
+        color: #e6edf3;
+      }
+    }
+
+    .gqm-settings-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      color: #57606a;
+      text-decoration: none;
+      transition: background 150ms ease, color 150ms ease;
+      font-size: 16px;
+    }
+
+    .gqm-settings-link:hover {
+      background: #f6f8fa;
+      color: #1f2328;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-settings-link {
+        color: #7d8590;
+      }
+
+      .gqm-settings-link:hover {
+        background: #161b22;
+        color: #e6edf3;
+      }
+    }
+
+    .gqm-open-panel-btn {
+      width: 100%;
+      background: #0969da;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .gqm-open-panel-btn:hover {
+      background: #0860ca;
+    }
+
+    .gqm-open-panel-btn:active {
+      background: #0757ba;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-open-panel-btn {
+        background: #1f6feb;
+      }
+
+      .gqm-open-panel-btn:hover {
+        background: #388bfd;
+      }
+    }
+
+    /* Popup Content */
+    .gqm-popup-content {
+      padding: 16px;
+    }
+
+    /* Reuse panel styles */
+    .gqm-section {
+      margin-bottom: 24px;
+    }
+
+    .gqm-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #57606a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 12px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-section-title {
+        color: #7d8590;
+      }
+    }
+
+    .gqm-meta-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #d0d7de;
+    }
+
+    .gqm-meta-item:last-child {
+      border-bottom: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-meta-item {
+        border-bottom-color: #21262d;
+      }
+    }
+
+    .gqm-meta-label {
+      font-size: 14px;
+      color: #57606a;
+      font-weight: 500;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-meta-label {
+        color: #7d8590;
+      }
+    }
+
+    .gqm-meta-value {
+      font-size: 14px;
+      color: #1f2328;
+      text-align: right;
+      flex: 1;
+      margin-left: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-meta-value {
+        color: #e6edf3;
+      }
+    }
+
+    .gqm-meta-value-muted {
+      color: #57606a;
+      font-size: 13px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-meta-value-muted {
+        color: #7d8590;
+      }
+    }
+
+    .gqm-stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .gqm-stat-label {
+      font-size: 13px;
+      color: #57606a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-stat-label {
+        color: #7d8590;
+      }
+    }
+
+    .gqm-stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-stat-value {
+        color: #e6edf3;
+      }
+    }
+
+    /* Trend Indicator */
+    .gqm-trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .gqm-trend-increasing {
+      background: #dafbe1;
+      color: #1a7f37;
+    }
+
+    .gqm-trend-decreasing {
+      background: #ffebe9;
+      color: #cf222e;
+    }
+
+    .gqm-trend-stable {
+      background: #ddf4ff;
+      color: #0969da;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-trend-increasing {
+        background: #033a16;
+        color: #4ac26b;
+      }
+
+      .gqm-trend-decreasing {
+        background: #490202;
+        color: #ff7b72;
+      }
+
+      .gqm-trend-stable {
+        background: #033d8b;
+        color: #79c0ff;
+      }
+    }
+
+    /* Loading Skeleton */
+    .gqm-skeleton {
+      background: linear-gradient(90deg, #f6f8fa 25%, #eaeef2 50%, #f6f8fa 75%);
+      background-size: 200% 100%;
+      animation: gqm-loading 1.5s ease-in-out infinite;
+      border-radius: 6px;
+      height: 16px;
+      margin: 8px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-skeleton {
+        background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%);
+        background-size: 200% 100%;
+      }
+    }
+
+    @keyframes gqm-loading {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .gqm-skeleton-line {
+      height: 16px;
+      margin-bottom: 12px;
+    }
+
+    .gqm-skeleton-line:last-child {
+      width: 60%;
+    }
+
+    /* Error State */
+    .gqm-error {
+      padding: 16px;
+      background: #fff8c5;
+      border: 1px solid #d4a72c;
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-error {
+        background: #3d2c00;
+        border-color: #6c4400;
+      }
+    }
+
+    .gqm-error-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+      margin: 0 0 8px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-error-title {
+        color: #e6edf3;
+      }
+    }
+
+    .gqm-error-message {
+      font-size: 13px;
+      color: #57606a;
+      margin: 0 0 12px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-error-message {
+        color: #9e6a03;
+      }
+    }
+
+    .gqm-retry-btn {
+      background: #0969da;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .gqm-retry-btn:hover {
+      background: #0860ca;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .gqm-retry-btn {
+        background: #1f6feb;
+      }
+
+      .gqm-retry-btn:hover {
+        background: #388bfd;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="gqm-popup-header">
+    <div class="gqm-popup-title-row">
+      <h1 class="gqm-popup-title">Repository Metadata</h1>
+      <a href="#" class="gqm-settings-link" id="settingsLink" title="Settings">⚙️</a>
+    </div>
+    <button class="gqm-open-panel-btn" id="openPanelBtn">Open in Side Panel</button>
+  </div>
+  <div class="gqm-popup-content" id="popupContent">
+    <!-- Content will be injected by popup.js -->
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

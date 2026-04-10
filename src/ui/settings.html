@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Quick Metadata - Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      background: #f6f8fa;
+      color: #1f2328;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #0d1117;
+        color: #e6edf3;
+      }
+    }
+
+    .settings-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-container {
+        background: #161b22;
+        border-color: #30363d;
+      }
+    }
+
+    .settings-header {
+      padding: 24px;
+      border-bottom: 1px solid #d0d7de;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-header {
+        border-bottom-color: #30363d;
+      }
+    }
+
+    .settings-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2328;
+      margin: 0 0 8px 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-title {
+        color: #e6edf3;
+      }
+    }
+
+    .settings-subtitle {
+      font-size: 14px;
+      color: #57606a;
+      margin: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-subtitle {
+        color: #7d8590;
+      }
+    }
+
+    .settings-body {
+      padding: 24px;
+    }
+
+    .settings-section {
+      margin-bottom: 32px;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2328;
+      margin: 0 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #d0d7de;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .section-title {
+        color: #e6edf3;
+        border-bottom-color: #21262d;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+      margin-bottom: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .form-label {
+        color: #e6edf3;
+      }
+    }
+
+    .form-description {
+      font-size: 13px;
+      color: #57606a;
+      margin-bottom: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .form-description {
+        color: #7d8590;
+      }
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      color: #1f2328;
+      font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #0969da;
+      box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .form-input {
+        background: #0d1117;
+        border-color: #30363d;
+        color: #e6edf3;
+      }
+
+      .form-input:focus {
+        border-color: #1f6feb;
+        box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.1);
+      }
+    }
+
+    .security-warning {
+      padding: 12px 16px;
+      background: #fff8c5;
+      border: 1px solid #d4a72c;
+      border-radius: 6px;
+      margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .security-warning {
+        background: #3d2c00;
+        border-color: #6c4400;
+      }
+    }
+
+    .security-warning-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .security-warning-text {
+      font-size: 13px;
+      color: #1f2328;
+      line-height: 1.6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .security-warning-text {
+        color: #e6edf3;
+      }
+    }
+
+    .security-warning-text strong {
+      font-weight: 600;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .toggle-option {
+      flex: 1;
+      padding: 10px 16px;
+      background: #f6f8fa;
+      border: 2px solid #d0d7de;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2328;
+    }
+
+    .toggle-option:hover {
+      background: #eaeef2;
+      border-color: #afb8c1;
+    }
+
+    .toggle-option.active {
+      background: #ddf4ff;
+      border-color: #0969da;
+      color: #0969da;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .toggle-option {
+        background: #161b22;
+        border-color: #30363d;
+        color: #e6edf3;
+      }
+
+      .toggle-option:hover {
+        background: #21262d;
+        border-color: #484f58;
+      }
+
+      .toggle-option.active {
+        background: #033d8b;
+        border-color: #1f6feb;
+        color: #79c0ff;
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkbox-input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #0969da;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .checkbox-input {
+        accent-color: #1f6feb;
+      }
+    }
+
+    .checkbox-label {
+      font-size: 14px;
+      color: #1f2328;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .checkbox-label {
+        color: #e6edf3;
+      }
+    }
+
+    .cache-stats {
+      padding: 16px;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cache-stats {
+        background: #161b22;
+        border-color: #30363d;
+      }
+    }
+
+    .cache-stat-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .cache-stat-label {
+      font-size: 14px;
+      color: #57606a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cache-stat-label {
+        color: #7d8590;
+      }
+    }
+
+    .cache-stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2328;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cache-stat-value {
+        color: #e6edf3;
+      }
+    }
+
+    .cache-progress {
+      width: 100%;
+      height: 8px;
+      background: #d0d7de;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cache-progress {
+        background: #21262d;
+      }
+    }
+
+    .cache-progress-bar {
+      height: 100%;
+      background: #0969da;
+      border-radius: 4px;
+      transition: width 300ms ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .cache-progress-bar {
+        background: #1f6feb;
+      }
+    }
+
+    .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 150ms ease;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: #0969da;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #0860ca;
+    }
+
+    .btn-primary:active {
+      background: #0757ba;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-primary {
+        background: #1f6feb;
+      }
+
+      .btn-primary:hover {
+        background: #388bfd;
+      }
+
+      .btn-primary:active {
+        background: #1f6feb;
+      }
+    }
+
+    .btn-danger {
+      background: #cf222e;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      background: #a40e26;
+    }
+
+    .btn-danger:active {
+      background: #8e1120;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .btn-danger {
+        background: #da3633;
+      }
+
+      .btn-danger:hover {
+        background: #ff7b72;
+      }
+
+      .btn-danger:active {
+        background: #da3633;
+      }
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .save-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #1a7f37;
+      padding: 6px 12px;
+      background: #dafbe1;
+      border-radius: 6px;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    .save-indicator.show {
+      opacity: 1;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .save-indicator {
+        color: #4ac26b;
+        background: #033a16;
+      }
+    }
+
+    .settings-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 0 0 6px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .settings-footer {
+        background: #0d1117;
+        border-top-color: #30363d;
+      }
+    }
+
+    .version-info {
+      font-size: 13px;
+      color: #57606a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .version-info {
+        color: #7d8590;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1 class="settings-title">GitHub Quick Metadata Settings</h1>
+      <p class="settings-subtitle">Configure your extension preferences</p>
+    </div>
+
+    <div class="settings-body">
+      <!-- GitHub Personal Access Token Section -->
+      <div class="settings-section">
+        <h2 class="section-title">GitHub Personal Access Token</h2>
+        <div class="form-group">
+          <label for="githubToken" class="form-label">Personal Access Token</label>
+          <p class="form-description">
+            Optional: Provide a GitHub Personal Access Token to increase API rate limits (60 → 5000 requests/hour).
+            Create a token with minimal permissions at <a href="https://github.com/settings/tokens" target="_blank" style="color: inherit; text-decoration: underline;">github.com/settings/tokens</a>
+          </p>
+          <input
+            type="password"
+            id="githubToken"
+            class="form-input"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            autocomplete="off"
+          />
+          <div class="security-warning">
+            <div class="security-warning-icon">⚠️</div>
+            <div class="security-warning-text">
+              <strong>Security Notice:</strong> Your Personal Access Token is <strong>stored locally in plaintext</strong> on your device. For security, create a token with <strong>minimal permissions</strong> (read-only access to public repositories). <strong>Never share this token.</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Display Mode Section -->
+      <div class="settings-section">
+        <h2 class="section-title">Display Mode</h2>
+        <div class="form-group">
+          <label class="form-label">Preferred Display Mode</label>
+          <p class="form-description">
+            Choose how repository metadata is displayed when you click the extension icon.
+          </p>
+          <div class="toggle-group">
+            <div class="toggle-option" data-mode="popup">
+              <div>📋 Popup</div>
+              <div style="font-size: 12px; color: inherit; opacity: 0.8; margin-top: 4px;">Quick view overlay</div>
+            </div>
+            <div class="toggle-option active" data-mode="panel">
+              <div>📊 Side Panel</div>
+              <div style="font-size: 12px; color: inherit; opacity: 0.8; margin-top: 4px;">Full-width panel</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Section -->
+      <div class="settings-section">
+        <h2 class="section-title">Appearance</h2>
+        <div class="form-group">
+          <label class="form-label">Theme</label>
+          <p class="form-description">
+            Choose your preferred color theme.
+          </p>
+          <div class="toggle-group">
+            <div class="toggle-option" data-theme="light">☀️ Light</div>
+            <div class="toggle-option" data-theme="dark">🌙 Dark</div>
+            <div class="toggle-option active" data-theme="auto">⚙️ Auto</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cache Management Section -->
+      <div class="settings-section">
+        <h2 class="section-title">Cache Management</h2>
+        <div class="form-group">
+          <label class="form-label">Cache Statistics</label>
+          <div class="cache-stats">
+            <div class="cache-stat-item">
+              <span class="cache-stat-label">Cached Entries</span>
+              <span class="cache-stat-value" id="cacheEntryCount">0</span>
+            </div>
+            <div class="cache-stat-item">
+              <span class="cache-stat-label">Storage Used</span>
+              <span class="cache-stat-value" id="cacheUsedSpace">0 KB</span>
+            </div>
+            <div class="cache-progress">
+              <div class="cache-progress-bar" id="cacheProgressBar" style="width: 0%"></div>
+            </div>
+            <div style="font-size: 12px; color: #57606a; margin-top: 8px;" id="cachePercentText">0% of estimated quota used</div>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="cacheEnabled" class="checkbox-input" checked />
+            <label for="cacheEnabled" class="checkbox-label">Enable caching for faster performance</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-danger" id="clearCacheBtn">🗑️ Clear Cache</button>
+          <p class="form-description" style="margin-top: 8px;">
+            Clear all cached repository data. This will free up storage space but may slow down initial page loads.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <div class="version-info">GitHub Quick Metadata v1.0.0</div>
+      <div class="save-indicator" id="saveIndicator">
+        ✓ Settings saved
+      </div>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>
