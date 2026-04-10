@@ -3,7 +3,7 @@
  * Extracts common code to eliminate duplication
  */
 
-import { fetchRepoMetadata, fetchFirstCommit, fetchCommitActivity } from '../core/api.js';
+import { fetchRepoMetadata } from '../core/api.js';
 import { cacheGet, cacheSet, buildCacheKey } from '../core/cache.js';
 import { createElement } from '../utils/dom.js';
 
@@ -23,62 +23,8 @@ export async function fetchRepoMetadataWithCache(owner, repo) {
   }
 
   const result = await fetchRepoMetadata(owner, repo);
-  // fetchRepoMetadata returns just the data, need to call the lower-level API
   cacheSet(cacheKey, result);
   return { data: result, rateLimit: null };
-}
-
-/**
- * Fetch first commit with caching
- * @param {string} owner
- * @param {string} repo
- * @returns {Promise<object|null>}
- */
-export async function fetchFirstCommitWithCache(owner, repo) {
-  const cacheKey = buildCacheKey(owner, repo, 'first_commit');
-  const cached = cacheGet(cacheKey);
-
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const data = await fetchFirstCommit(owner, repo);
-    if (data) {
-      cacheSet(cacheKey, data);
-    }
-    return data;
-  } catch (error) {
-    // First commit fetch can timeout or fail for large repos
-    console.warn('[github-quick-metadata] First commit fetch failed:', error);
-    return null;
-  }
-}
-
-/**
- * Fetch commit activity with caching
- * @param {string} owner
- * @param {string} repo
- * @returns {Promise<Array|null>}
- */
-export async function fetchCommitActivityWithCache(owner, repo) {
-  const cacheKey = buildCacheKey(owner, repo, 'commit_activity');
-  const cached = cacheGet(cacheKey);
-
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const data = await fetchCommitActivity(owner, repo);
-    if (data) {
-      cacheSet(cacheKey, data);
-    }
-    return data;
-  } catch (error) {
-    console.warn('[github-quick-metadata] Commit activity fetch failed:', error);
-    return null;
-  }
 }
 
 /**
@@ -140,19 +86,6 @@ export function createMetaItem(label, value, mutedValue) {
 
   item.appendChild(valueContainer);
   return item;
-}
-
-/**
- * Create a stat item
- * @param {string} label
- * @param {string} value
- * @returns {HTMLElement}
- */
-export function createStatItem(label, value) {
-  return createElement('div', { className: 'gqm-stat-item' }, [
-    createElement('div', { className: 'gqm-stat-label', textContent: label }),
-    createElement('div', { className: 'gqm-stat-value', textContent: value })
-  ]);
 }
 
 /**

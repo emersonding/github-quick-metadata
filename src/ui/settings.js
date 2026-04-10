@@ -4,13 +4,15 @@
  */
 
 import { cacheStats, cacheClear } from '../core/cache.js';
+import { FIELD_REGISTRY, getDefaultEnabledFields, getFieldsByCategory } from '../core/field-registry.js';
 
 // Default settings
 const DEFAULT_SETTINGS = {
   githubToken: null,
   displayMode: 'panel',
   theme: 'auto',
-  cacheEnabled: true
+  cacheEnabled: true,
+  enabledFields: getDefaultEnabledFields()
 };
 
 // Debounce timeout for auto-save
@@ -28,6 +30,9 @@ export async function initSettings() {
 
   // Load cache statistics
   await updateCacheStats();
+
+  // Render field checkboxes
+  renderFieldCheckboxes();
 
   // Set up event listeners
   setupEventListeners();
@@ -139,6 +144,50 @@ function showSaveIndicator() {
 }
 
 /**
+ * Render field checkboxes dynamically from registry
+ */
+async function renderFieldCheckboxes() {
+  const settings = await getSettings();
+  const enabledFields = settings.enabledFields || getDefaultEnabledFields();
+  const fieldsByCategory = getFieldsByCategory();
+
+  const categories = [
+    { id: 'dates', title: 'Date Fields', fields: fieldsByCategory.dates },
+    { id: 'metrics', title: 'Metrics', fields: fieldsByCategory.metrics },
+    { id: 'info', title: 'Information', fields: fieldsByCategory.info },
+    { id: 'flags', title: 'Flags', fields: fieldsByCategory.flags }
+  ];
+
+  categories.forEach(category => {
+    const container = document.getElementById(`fieldsCategory-${category.id}`);
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    category.fields.forEach(field => {
+      const checkboxWrapper = document.createElement('div');
+      checkboxWrapper.className = 'checkbox-group';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `field-${field.key}`;
+      checkbox.className = 'checkbox-input';
+      checkbox.checked = enabledFields.includes(field.key);
+      checkbox.dataset.fieldKey = field.key;
+
+      const label = document.createElement('label');
+      label.htmlFor = `field-${field.key}`;
+      label.className = 'checkbox-label';
+      label.textContent = field.label;
+
+      checkboxWrapper.appendChild(checkbox);
+      checkboxWrapper.appendChild(label);
+      container.appendChild(checkboxWrapper);
+    });
+  });
+}
+
+/**
  * Set up event listeners for all settings controls
  */
 function setupEventListeners() {
@@ -195,6 +244,26 @@ function setupEventListeners() {
       await saveSettings(settings);
     });
   }
+
+  // Field checkboxes (delegated event listener)
+  document.addEventListener('change', async (e) => {
+    if (e.target.matches('.checkbox-input[data-field-key]')) {
+      const fieldKey = e.target.dataset.fieldKey;
+      const settings = await getSettings();
+
+      if (e.target.checked) {
+        // Add field to enabled list
+        if (!settings.enabledFields.includes(fieldKey)) {
+          settings.enabledFields.push(fieldKey);
+        }
+      } else {
+        // Remove field from enabled list
+        settings.enabledFields = settings.enabledFields.filter(k => k !== fieldKey);
+      }
+
+      await saveSettings(settings);
+    }
+  });
 
   // Clear cache button
   const clearCacheBtn = document.getElementById('clearCacheBtn');

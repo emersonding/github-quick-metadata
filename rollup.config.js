@@ -42,8 +42,10 @@ const copyStaticFiles = (target) => ({
     const manifest = target === 'firefox' ? {
       manifest_version: 2,
       name: 'GitHub Quick Metadata',
-      version: '1.0.0',
-      description: 'Quick access to GitHub repository metadata',
+      version: '2.0.0',
+      description: 'Display GitHub repository metadata including creation date, update time, and customizable fields directly in the About section',
+      author: 'github-quick-metadata',
+      homepage_url: 'https://github.com/your-username/github-quick-metadata',
       permissions: [
         'activeTab',
         'tabs',
@@ -56,6 +58,12 @@ const copyStaticFiles = (target) => ({
         "48": "icons/icon48.png",
         "128": "icons/icon128.png"
       },
+      browser_specific_settings: {
+        gecko: {
+          id: '{github-quick-metadata@example.com}',
+          strict_min_version: '109.0'
+        }
+      },
       content_scripts: [
         {
           matches: ['https://github.com/*/*'],
@@ -65,7 +73,11 @@ const copyStaticFiles = (target) => ({
       ],
       browser_action: {
         default_popup: 'popup.html',
-        default_title: 'GitHub Quick Metadata'
+        default_title: 'GitHub Quick Metadata',
+        default_icon: {
+          "16": "icons/icon16.png",
+          "48": "icons/icon48.png"
+        }
       },
       options_ui: {
         page: 'settings.html',
@@ -74,8 +86,10 @@ const copyStaticFiles = (target) => ({
     } : {
       manifest_version: 3,
       name: 'GitHub Quick Metadata',
-      version: '1.0.0',
-      description: 'Quick access to GitHub repository metadata',
+      version: '2.0.0',
+      description: 'Display GitHub repository metadata including creation date, update time, and customizable fields directly in the About section',
+      author: 'github-quick-metadata',
+      homepage_url: 'https://github.com/your-username/github-quick-metadata',
       permissions: ['activeTab', 'tabs', 'storage'],
       host_permissions: [
         'https://github.com/*',
@@ -95,7 +109,12 @@ const copyStaticFiles = (target) => ({
       ],
       action: {
         default_popup: 'popup.html',
-        default_title: 'GitHub Quick Metadata'
+        default_title: 'GitHub Quick Metadata',
+        default_icon: {
+          "16": "icons/icon16.png",
+          "48": "icons/icon48.png",
+          "128": "icons/icon128.png"
+        }
       },
       options_ui: {
         page: 'settings.html',
@@ -173,8 +192,8 @@ const firefoxConfig = [
 const userscriptBanner = `// ==UserScript==
 // @name         GitHub Quick Metadata
 // @namespace    https://github.com/
-// @version      1.0.0
-// @description  Quick access to GitHub repository metadata
+// @version      2.0.0
+// @description  Display GitHub repository metadata including creation date, update time, and customizable fields
 // @author       github-quick-metadata
 // @match        https://github.com/*/*
 // @grant        GM_xmlhttpRequest

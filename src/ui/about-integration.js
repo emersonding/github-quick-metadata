@@ -3,12 +3,11 @@
  * Injects repository metadata directly into GitHub's native About section
  */
 
-import { fetchRepoMetadataWithCache, fetchFirstCommitWithCache, fetchCommitActivityWithCache } from './shared.js';
-import { calculateCommitStats } from '../core/stats.js';
-import { formatDate, formatRelativeDate } from '../utils/date.js';
-import { createElement, addClass } from '../utils/dom.js';
+import { fetchRepoMetadataWithCache } from './shared.js';
+import { createElement } from '../utils/dom.js';
 import { getCurrentRepo } from '../utils/github.js';
 import { fetchRepoMetadataWithRateLimit } from '../core/api.js';
+import { FIELD_REGISTRY, formatFieldValue } from '../core/field-registry.js';
 
 /**
  * Find GitHub's About section in the DOM
@@ -110,28 +109,22 @@ const ICONS = {
   calendar: `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="fill: currentColor;">
     <path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"></path>
   </svg>`,
-
-  commit: `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="fill: currentColor;">
-    <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
-  </svg>`,
-
-  activity: `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="fill: currentColor;">
-    <path d="M1.5 8a6.5 6.5 0 0 1 13 0 .75.75 0 0 0 1.5 0 8 8 0 1 0-8 8 .75.75 0 0 0 0-1.5A6.5 6.5 0 0 1 1.5 8Z"></path>
+  default: `<svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="fill: currentColor;">
+    <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"></path>
   </svg>`
 };
 
 /**
- * Get trend indicator with appropriate styling
- * @param {string} trend - 'increasing', 'decreasing', or 'stable'
- * @returns {string}
+ * Get settings from chrome.storage.local
+ * @returns {Promise<object>}
  */
-function getTrendIndicator(trend) {
-  const indicators = {
-    increasing: '↗',
-    decreasing: '↘',
-    stable: '→'
-  };
-  return indicators[trend] || '→';
+async function getSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['settings'], (result) => {
+      const settings = result.settings || {};
+      resolve(settings);
+    });
+  });
 }
 
 /**
@@ -153,12 +146,11 @@ async function injectMetadata(aboutSection) {
   // Add loading placeholders
   container.appendChild(createLoadingRow());
   container.appendChild(createLoadingRow());
-  container.appendChild(createLoadingRow());
 
   // Insert into About section
   aboutSection.appendChild(container);
 
-  // Fetch data in parallel
+  // Fetch data
   try {
     const repo = getCurrentRepo();
     if (!repo) {
@@ -167,68 +159,47 @@ async function injectMetadata(aboutSection) {
 
     const { owner, repo: repoName } = repo;
 
-    // Fetch all data in parallel for maximum speed
-    const [metadataResult, firstCommit, commitActivity] = await Promise.all([
-      fetchRepoMetadataWithRateLimit(owner, repoName).catch(err => {
-        console.warn('[github-quick-metadata] Metadata fetch failed, using cache:', err);
-        return fetchRepoMetadataWithCache(owner, repoName);
-      }),
-      fetchFirstCommitWithCache(owner, repoName).catch(err => {
-        console.warn('[github-quick-metadata] First commit fetch failed:', err);
-        return null;
-      }),
-      fetchCommitActivityWithCache(owner, repoName).catch(err => {
-        console.warn('[github-quick-metadata] Commit activity fetch failed:', err);
-        return null;
-      })
-    ]);
+    // Fetch metadata only
+    const metadataResult = await fetchRepoMetadataWithRateLimit(owner, repoName).catch(err => {
+      console.warn('[github-quick-metadata] Metadata fetch failed, using cache:', err);
+      return fetchRepoMetadataWithCache(owner, repoName);
+    });
 
     const metadata = metadataResult.data;
 
     // Clear loading placeholders
     container.innerHTML = '';
 
-    // Add "Extended Metadata" header
+    // Add "Quick Metadata" header
     const header = createElement('div', {
       style: 'font-size: 12px; font-weight: 600; color: var(--fgColor-muted, #656d76); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;'
     });
     header.textContent = 'Quick Metadata';
     container.appendChild(header);
 
-    // Add repository created date
-    const createdRow = createAboutRow(
-      ICONS.calendar,
-      'Created',
-      formatDate(metadata.created_at),
-      formatRelativeDate(metadata.created_at)
-    );
-    container.appendChild(createdRow);
+    // Get enabled fields from settings
+    const settings = await getSettings();
+    const enabledFields = settings.enabledFields || ['created_at', 'updated_at'];
 
-    // Add first commit date
-    if (firstCommit && firstCommit.date) {
-      const firstCommitRow = createAboutRow(
-        ICONS.commit,
-        'First commit',
-        formatDate(firstCommit.date),
-        formatRelativeDate(firstCommit.date)
+    // Render each enabled field
+    enabledFields.forEach(fieldKey => {
+      const field = FIELD_REGISTRY[fieldKey];
+      if (!field) return;
+
+      const formattedValue = formatFieldValue(fieldKey, metadata);
+      if (!formattedValue) return;
+
+      // Use calendar icon for date fields, default icon for others
+      const icon = field.category === 'dates' ? ICONS.calendar : ICONS.default;
+
+      const row = createAboutRow(
+        icon,
+        field.label,
+        formattedValue.primary,
+        formattedValue.secondary
       );
-      container.appendChild(firstCommitRow);
-    }
-
-    // Add commit activity with trend
-    if (commitActivity) {
-      const stats = calculateCommitStats(commitActivity);
-      const trendIndicator = getTrendIndicator(stats.trend);
-      const commitValue = `${stats.totalCommits.toLocaleString()} ${trendIndicator}`;
-
-      const commitsRow = createAboutRow(
-        ICONS.activity,
-        'Commits (past year)',
-        commitValue,
-        `Trend: ${stats.trend} (avg ${stats.avgCommitsPerWeek.toFixed(1)}/week)`
-      );
-      container.appendChild(commitsRow);
-    }
+      container.appendChild(row);
+    });
 
   } catch (error) {
     console.error('[github-quick-metadata] Error injecting metadata:', error);
