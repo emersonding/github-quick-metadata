@@ -3,7 +3,7 @@
  * Injects repository metadata directly into GitHub's native About section
  */
 
-import { fetchRepoMetadataWithCache } from './shared.js';
+import { fetchRepoMetadataWithCache, formatErrorMessage } from './shared.js';
 import { createElement } from '../utils/dom.js';
 import { getCurrentRepo } from '../utils/github.js';
 import { fetchRepoMetadataWithRateLimit } from '../core/api.js';
@@ -204,11 +204,11 @@ async function injectMetadata(aboutSection) {
   } catch (error) {
     console.error('[github-quick-metadata] Error injecting metadata:', error);
 
-    // Show error state
+    // Show error state with friendly message
     container.innerHTML = '';
     const errorMsg = createElement('div', {
-      style: 'color: var(--fgColor-danger, #cf222e); font-size: 12px; margin-top: 8px;',
-      textContent: `Failed to load metadata: ${error.message}`
+      style: 'color: var(--fgColor-muted, #656d76); font-size: 12px; margin-top: 8px; line-height: 1.5;',
+      textContent: formatErrorMessage(error.message)
     });
     container.appendChild(errorMsg);
   }

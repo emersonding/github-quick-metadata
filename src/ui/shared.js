@@ -43,15 +43,42 @@ export function createLoadingSkeleton() {
 }
 
 /**
+ * Format error message into user-friendly text
+ * @param {string} message - Raw error message
+ * @returns {string} User-friendly error message
+ */
+export function formatErrorMessage(message) {
+  // Check for 404 errors (private repos or non-existent repos)
+  if (message.includes('404') || message.includes('Not found')) {
+    return 'This repository is private or does not exist. Private repositories require a GitHub Personal Access Token with appropriate permissions.';
+  }
+
+  // Check for 403 rate limit errors
+  if (message.includes('403') && message.includes('rate limit')) {
+    return 'GitHub API rate limit exceeded. Please wait or add a Personal Access Token in Settings to increase your limit.';
+  }
+
+  // Check for 401 authentication errors
+  if (message.includes('401') || message.includes('Unauthorized')) {
+    return 'Authentication failed. Please check your GitHub Personal Access Token in Settings.';
+  }
+
+  // For other errors, return the original message
+  return message;
+}
+
+/**
  * Create error state UI
  * @param {string} message
  * @param {Function} onRetry
  * @returns {HTMLElement}
  */
 export function createErrorState(message, onRetry) {
+  const friendlyMessage = formatErrorMessage(message);
+
   return createElement('div', { className: 'gqm-error' }, [
-    createElement('div', { className: 'gqm-error-title', textContent: 'Failed to load metadata' }),
-    createElement('div', { className: 'gqm-error-message', textContent: message }),
+    createElement('div', { className: 'gqm-error-title', textContent: 'Unable to load metadata' }),
+    createElement('div', { className: 'gqm-error-message', textContent: friendlyMessage }),
     createElement('button', {
       className: 'gqm-retry-btn',
       textContent: 'Retry',
