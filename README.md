@@ -2,6 +2,27 @@
 
 Display GitHub repository metadata directly in the About section. View creation date, update time, and 25+ customizable fields - all without leaving the page.
 
+## Screenshots
+
+### Metadata Display on GitHub Repository
+
+<img src="screenshots/about-section.png" alt="Metadata in About Section" width="350">
+
+*Repository metadata displayed directly in GitHub's native About section*
+
+### Settings Page - Field Configuration
+
+<img src="screenshots/settings-page.png" alt="Metadata in About Section" width="500">
+
+*Configure which metadata fields to display - choose from 25+ fields across 4 categories*
+
+> **Note**: To create these screenshots:
+> 1. Load the extension: `npm run build && load dist/chrome in chrome://extensions`
+> 2. Visit any GitHub repo (e.g., https://github.com/facebook/react)
+> 3. Screenshot 1: Capture the About section showing the metadata
+> 4. Screenshot 2: Click extension icon → Settings, capture the "Displayed Fields" section
+
+
 ## Features
 
 - **Configurable Fields**: Choose from 25+ metadata fields across 4 categories (dates, metrics, info, flags)
@@ -15,24 +36,6 @@ Display GitHub repository metadata directly in the About section. View creation 
 ### Optional: GitHub Personal Access Token
 
 **Only needed for heavy usage.** Without a token, you get 60 API requests/hour which is sufficient for normal browsing. Providing a token increases this to 5,000 requests/hour. See [Configuration](#configuration) below.
-
-## Screenshots
-
-### Metadata Display on GitHub Repository
-
-![Metadata in About Section](screenshots/about-section.png)
-*Repository metadata displayed directly in GitHub's native About section*
-
-### Settings Page - Field Configuration
-
-![Settings Page](screenshots/settings-page.png)
-*Configure which metadata fields to display - choose from 25+ fields across 4 categories*
-
-> **Note**: To create these screenshots:
-> 1. Load the extension: `npm run build && load dist/chrome in chrome://extensions`
-> 2. Visit any GitHub repo (e.g., https://github.com/facebook/react)
-> 3. Screenshot 1: Capture the About section showing the metadata
-> 4. Screenshot 2: Click extension icon → Settings, capture the "Displayed Fields" section
 
 ## Installation
 
