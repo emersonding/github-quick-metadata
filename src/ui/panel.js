@@ -3,16 +3,25 @@
  * Displays repository metadata in a sliding panel
  */
 
-import { fetchRepoMetadataWithRateLimit } from '../core/api.js';
 import { createElement, addClass, removeClass, toggleClass } from '../utils/dom.js';
 import { getCurrentRepo } from '../utils/github.js';
-import { FIELD_REGISTRY, formatFieldValue } from '../core/field-registry.js';
 import {
-  fetchRepoMetadataWithCache,
+  FIELD_REGISTRY,
+  formatFieldValue,
+  getDefaultEnabledFields,
+  getOrderedEnabledFields
+} from '../core/field-registry.js';
+import {
+  fetchBaseRepoMetadata,
+  fetchReleaseDownloadStatsWithCache,
+  hasReleaseFields,
+  isReleaseField,
   createLoadingSkeleton,
   createErrorState,
   createMetaItem,
-  createRateLimitDisplay
+  createRateLimitDisplay,
+  updateMetaItem,
+  updateRateLimitDisplay
 } from './shared.js';
 
 /**
@@ -108,27 +117,31 @@ async function loadPanelData(content) {
     }
 
     const { owner, repo: repoName } = repo;
+    const settings = await getSettings();
+    const enabledFields = getOrderedEnabledFields(settings.enabledFields || getDefaultEnabledFields());
 
-    // Fetch metadata only
-    const metadataResult = await fetchRepoMetadataWithRateLimit(owner, repoName).catch(err => {
-      // Try cache on failure
-      return fetchRepoMetadataWithCache(owner, repoName);
-    });
-
-    const metadata = metadataResult.data;
-    const rateLimit = metadataResult.rateLimit;
-
-    // Render content
     content.innerHTML = '';
-    const section = await createRepoInfoSection(metadata);
+    const { section, rowByField } = createRepoInfoSection(enabledFields);
     content.appendChild(section);
 
-    // Add rate limit footer
     const footer = createElement('div', { className: 'gqm-panel-footer' });
-    if (rateLimit) {
-      footer.appendChild(createRateLimitDisplay(rateLimit));
-    }
+    footer.appendChild(createRateLimitDisplay(null));
     content.appendChild(footer);
+
+    const metadataResult = await fetchBaseRepoMetadata(owner, repoName);
+    updateRepoInfoRows(rowByField, metadataResult.data, enabledFields, fieldKey => !isReleaseField(fieldKey));
+    updateRateLimitDisplay(footer, metadataResult.rateLimit);
+
+    if (hasReleaseFields(enabledFields)) {
+      try {
+        const releaseStatsResult = await fetchReleaseDownloadStatsWithCache(owner, repoName);
+        updateRepoInfoRows(rowByField, releaseStatsResult.data, enabledFields, isReleaseField);
+        updateRateLimitDisplay(footer, releaseStatsResult.rateLimit || metadataResult.rateLimit);
+      } catch (error) {
+        console.warn('[github-quick-metadata] Error loading release metadata:', error);
+        updateReleaseRowsError(rowByField, enabledFields);
+      }
+    }
 
   } catch (error) {
     console.error('[github-quick-metadata] Error loading panel data:', error);
@@ -152,34 +165,57 @@ async function getSettings() {
 
 /**
  * Create repository info section
- * @param {object} metadata
- * @returns {Promise<HTMLElement>}
+ * @param {string[]} enabledFields
+ * @returns {{ section: HTMLElement, rowByField: Map<string, HTMLElement> }}
  */
-async function createRepoInfoSection(metadata) {
+function createRepoInfoSection(enabledFields) {
   const section = createElement('div', { className: 'gqm-section' }, [
     createElement('h3', { className: 'gqm-section-title', textContent: 'Repository Info' })
   ]);
-
-  // Get enabled fields from settings
-  const settings = await getSettings();
-  const enabledFields = settings.enabledFields || ['created_at', 'updated_at'];
+  const rowByField = new Map();
 
   // Render each enabled field
   enabledFields.forEach(fieldKey => {
     const field = FIELD_REGISTRY[fieldKey];
     if (!field) return;
 
+    const row = createMetaItem(field.label, 'Loading...');
+    rowByField.set(fieldKey, row);
+    section.appendChild(row);
+  });
+
+  return { section, rowByField };
+}
+
+/**
+ * Update rendered metadata rows from a data payload.
+ * @param {Map<string, HTMLElement>} rowByField
+ * @param {object} metadata
+ * @param {string[]} enabledFields
+ * @param {(fieldKey: string) => boolean} shouldUpdate
+ */
+function updateRepoInfoRows(rowByField, metadata, enabledFields, shouldUpdate) {
+  enabledFields.forEach(fieldKey => {
+    if (!shouldUpdate(fieldKey)) return;
+
+    const row = rowByField.get(fieldKey);
+    if (!row) return;
+
     const formattedValue = formatFieldValue(fieldKey, metadata);
     if (!formattedValue) return;
 
-    section.appendChild(
-      createMetaItem(
-        field.label,
-        formattedValue.primary,
-        formattedValue.secondary
-      )
-    );
+    updateMetaItem(row, formattedValue);
   });
+}
 
-  return section;
+/**
+ * Mark release-backed rows as unavailable after a release request failure.
+ * @param {Map<string, HTMLElement>} rowByField
+ * @param {string[]} enabledFields
+ */
+function updateReleaseRowsError(rowByField, enabledFields) {
+  enabledFields.forEach(fieldKey => {
+    if (!isReleaseField(fieldKey)) return;
+    updateMetaItem(rowByField.get(fieldKey), { primary: 'Unable to load' });
+  });
 }

@@ -3,11 +3,21 @@
  * Injects repository metadata directly into GitHub's native About section
  */
 
-import { fetchRepoMetadataWithCache, formatErrorMessage } from './shared.js';
+import {
+  fetchBaseRepoMetadata,
+  fetchReleaseDownloadStatsWithCache,
+  formatErrorMessage,
+  hasReleaseFields,
+  isReleaseField
+} from './shared.js';
 import { createElement } from '../utils/dom.js';
 import { getCurrentRepo } from '../utils/github.js';
-import { fetchRepoMetadataWithRateLimit } from '../core/api.js';
-import { FIELD_REGISTRY, formatFieldValue } from '../core/field-registry.js';
+import {
+  FIELD_REGISTRY,
+  formatFieldValue,
+  getDefaultEnabledFields,
+  getOrderedEnabledFields
+} from '../core/field-registry.js';
 
 /**
  * Find GitHub's About section in the DOM
@@ -72,13 +82,14 @@ function createAboutRow(icon, label, value, title) {
 
   // Label
   const labelEl = createElement('span', {
-    textContent: label,
+    textContent: `${label}:`,
     style: 'margin-right: 4px;'
   });
 
   // Value
   const valueEl = createElement('span', {
     textContent: value,
+    className: 'gqm-about-value',
     style: 'color: var(--fgColor-default, #1f2328); font-weight: 600;'
   });
 
@@ -90,16 +101,23 @@ function createAboutRow(icon, label, value, title) {
 }
 
 /**
- * Create a loading placeholder row
- * @returns {HTMLElement}
+ * Update a rendered About metadata row.
+ * @param {HTMLElement} row
+ * @param {{ primary: string, secondary?: string }} formattedValue
  */
-function createLoadingRow() {
-  const row = createElement('div', {
-    className: 'gqm-about-loading',
-    style: 'margin-top: 8px; height: 20px; background: linear-gradient(90deg, #f6f8fa 25%, #eaeef2 50%, #f6f8fa 75%); background-size: 200% 100%; animation: gqm-shimmer 1.5s ease-in-out infinite; border-radius: 6px;'
-  });
+function updateAboutRow(row, formattedValue) {
+  if (!row || !formattedValue) return;
 
-  return row;
+  const valueEl = row.querySelector('.gqm-about-value');
+  if (!valueEl) return;
+
+  valueEl.textContent = formattedValue.primary;
+
+  if (formattedValue.secondary) {
+    row.setAttribute('title', formattedValue.secondary);
+  } else {
+    row.removeAttribute('title');
+  }
 }
 
 /**
@@ -143,10 +161,6 @@ async function injectMetadata(aboutSection) {
     style: 'margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--borderColor-muted, #d0d7de);'
   });
 
-  // Add loading placeholders
-  container.appendChild(createLoadingRow());
-  container.appendChild(createLoadingRow());
-
   // Insert into About section
   aboutSection.appendChild(container);
 
@@ -158,16 +172,9 @@ async function injectMetadata(aboutSection) {
     }
 
     const { owner, repo: repoName } = repo;
+    const settings = await getSettings();
+    const enabledFields = getOrderedEnabledFields(settings.enabledFields || getDefaultEnabledFields());
 
-    // Fetch metadata only
-    const metadataResult = await fetchRepoMetadataWithRateLimit(owner, repoName).catch(err => {
-      console.warn('[github-quick-metadata] Metadata fetch failed, using cache:', err);
-      return fetchRepoMetadataWithCache(owner, repoName);
-    });
-
-    const metadata = metadataResult.data;
-
-    // Clear loading placeholders
     container.innerHTML = '';
 
     // Add "Quick Metadata" header
@@ -177,29 +184,20 @@ async function injectMetadata(aboutSection) {
     header.textContent = 'Quick Metadata';
     container.appendChild(header);
 
-    // Get enabled fields from settings
-    const settings = await getSettings();
-    const enabledFields = settings.enabledFields || ['created_at', 'updated_at'];
+    const rowByField = renderAboutRows(container, enabledFields);
 
-    // Render each enabled field
-    enabledFields.forEach(fieldKey => {
-      const field = FIELD_REGISTRY[fieldKey];
-      if (!field) return;
+    const metadataResult = await fetchBaseRepoMetadata(owner, repoName);
+    updateAboutRows(rowByField, metadataResult.data, enabledFields, fieldKey => !isReleaseField(fieldKey));
 
-      const formattedValue = formatFieldValue(fieldKey, metadata);
-      if (!formattedValue) return;
-
-      // Use calendar icon for date fields, default icon for others
-      const icon = field.category === 'dates' ? ICONS.calendar : ICONS.default;
-
-      const row = createAboutRow(
-        icon,
-        field.label,
-        formattedValue.primary,
-        formattedValue.secondary
-      );
-      container.appendChild(row);
-    });
+    if (hasReleaseFields(enabledFields)) {
+      try {
+        const releaseStatsResult = await fetchReleaseDownloadStatsWithCache(owner, repoName);
+        updateAboutRows(rowByField, releaseStatsResult.data, enabledFields, isReleaseField);
+      } catch (error) {
+        console.warn('[github-quick-metadata] Error loading release metadata:', error);
+        updateReleaseRowsError(rowByField, enabledFields);
+      }
+    }
 
   } catch (error) {
     console.error('[github-quick-metadata] Error injecting metadata:', error);
@@ -215,29 +213,65 @@ async function injectMetadata(aboutSection) {
 }
 
 /**
+ * Render placeholder About rows for enabled fields.
+ * @param {HTMLElement} container
+ * @param {string[]} enabledFields
+ * @returns {Map<string, HTMLElement>}
+ */
+function renderAboutRows(container, enabledFields) {
+  const rowByField = new Map();
+
+  enabledFields.forEach(fieldKey => {
+    const field = FIELD_REGISTRY[fieldKey];
+    if (!field) return;
+
+    const icon = field.category === 'dates' ? ICONS.calendar : ICONS.default;
+    const row = createAboutRow(icon, field.label, 'Loading...');
+    rowByField.set(fieldKey, row);
+    container.appendChild(row);
+  });
+
+  return rowByField;
+}
+
+/**
+ * Update rendered About rows from a data payload.
+ * @param {Map<string, HTMLElement>} rowByField
+ * @param {object} metadata
+ * @param {string[]} enabledFields
+ * @param {(fieldKey: string) => boolean} shouldUpdate
+ */
+function updateAboutRows(rowByField, metadata, enabledFields, shouldUpdate) {
+  enabledFields.forEach(fieldKey => {
+    if (!shouldUpdate(fieldKey)) return;
+
+    const row = rowByField.get(fieldKey);
+    if (!row) return;
+
+    const formattedValue = formatFieldValue(fieldKey, metadata);
+    if (!formattedValue) return;
+
+    updateAboutRow(row, formattedValue);
+  });
+}
+
+/**
+ * Mark release-backed About rows as unavailable after a release request failure.
+ * @param {Map<string, HTMLElement>} rowByField
+ * @param {string[]} enabledFields
+ */
+function updateReleaseRowsError(rowByField, enabledFields) {
+  enabledFields.forEach(fieldKey => {
+    if (!isReleaseField(fieldKey)) return;
+    updateAboutRow(rowByField.get(fieldKey), { primary: 'Unable to load' });
+  });
+}
+
+/**
  * Initialize About section integration
  * @returns {boolean} - True if successfully initialized
  */
 export function initAboutIntegration() {
-  // Add shimmer animation style if not already present
-  if (!document.getElementById('gqm-about-styles')) {
-    const style = createElement('style', { id: 'gqm-about-styles' });
-    style.textContent = `
-      @keyframes gqm-shimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .gqm-about-loading {
-          background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%) !important;
-          background-size: 200% 100% !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   const aboutSection = findAboutSection();
   if (!aboutSection) {
     console.log('[github-quick-metadata] About section not found, will retry on next navigation');

@@ -162,6 +162,41 @@ export function parseRateLimitHeaders(headers) {
 }
 
 /**
+ * Sum release asset download counts.
+ * GitHub stores downloads on release assets, not the release object itself.
+ *
+ * @param {Array<object>} releases
+ * @returns {{ release_downloads: number, release_count: number, release_asset_count: number }}
+ */
+export function calculateReleaseDownloadStats(releases) {
+  if (!Array.isArray(releases)) {
+    return {
+      release_downloads: 0,
+      release_count: 0,
+      release_asset_count: 0,
+    };
+  }
+
+  return releases.reduce((totals, release) => {
+    const assets = Array.isArray(release.assets) ? release.assets : [];
+    const releaseDownloads = assets.reduce((sum, asset) => {
+      const downloadCount = Number(asset?.download_count);
+      return Number.isFinite(downloadCount) ? sum + downloadCount : sum;
+    }, 0);
+
+    return {
+      release_downloads: totals.release_downloads + releaseDownloads,
+      release_count: totals.release_count + 1,
+      release_asset_count: totals.release_asset_count + assets.length,
+    };
+  }, {
+    release_downloads: 0,
+    release_count: 0,
+    release_asset_count: 0,
+  });
+}
+
+/**
  * Perform a single GitHub API request with:
  * - Automatic PAT injection
  * - Rate limit detection and exponential backoff on 429
@@ -258,4 +293,21 @@ export async function fetchRepoMetadata(owner, repo, options = {}) {
 export async function fetchRepoMetadataWithRateLimit(owner, repo, options = {}) {
   const result = await githubFetch(`/repos/${owner}/${repo}`, options);
   return { data: result.data, rateLimit: result.rateLimit };
+}
+
+/**
+ * Fetch release download totals.
+ * GET /repos/{owner}/{repo}/releases
+ *
+ * @param {string} owner
+ * @param {string} repo
+ * @param {object} [options]
+ * @returns {Promise<{data: { release_downloads: number, release_count: number, release_asset_count: number }, rateLimit: object}>}
+ */
+export async function fetchReleaseDownloadStatsWithRateLimit(owner, repo, options = {}) {
+  const result = await githubFetch(`/repos/${owner}/${repo}/releases`, options);
+  return {
+    data: calculateReleaseDownloadStats(result.data),
+    rateLimit: result.rateLimit,
+  };
 }

@@ -4,7 +4,12 @@
  */
 
 import { cacheStats, cacheClear } from '../core/cache.js';
-import { FIELD_REGISTRY, getDefaultEnabledFields, getFieldsByCategory } from '../core/field-registry.js';
+import {
+  FIELD_REGISTRY,
+  getDefaultEnabledFields,
+  getFieldsByCategory,
+  getOrderedEnabledFields
+} from '../core/field-registry.js';
 
 // Default settings
 const DEFAULT_SETTINGS = {
@@ -154,6 +159,7 @@ async function renderFieldCheckboxes() {
   const categories = [
     { id: 'dates', title: 'Date Fields', fields: fieldsByCategory.dates },
     { id: 'metrics', title: 'Metrics', fields: fieldsByCategory.metrics },
+    { id: 'releases', title: 'Releases', fields: fieldsByCategory.releases },
     { id: 'info', title: 'Information', fields: fieldsByCategory.info },
     { id: 'flags', title: 'Flags', fields: fieldsByCategory.flags }
   ];
@@ -261,6 +267,7 @@ function setupEventListeners() {
         settings.enabledFields = settings.enabledFields.filter(k => k !== fieldKey);
       }
 
+      settings.enabledFields = getOrderedEnabledFields(settings.enabledFields);
       await saveSettings(settings);
     }
   });

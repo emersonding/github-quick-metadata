@@ -30,7 +30,7 @@ export const FIELD_REGISTRY = {
     label: 'Last Push',
     category: 'dates',
     type: 'date',
-    defaultEnabled: false
+    defaultEnabled: true
   },
 
   // Numeric metrics
@@ -82,6 +82,15 @@ export const FIELD_REGISTRY = {
     category: 'metrics',
     type: 'number',
     defaultEnabled: false
+  },
+
+  // Release fields
+  release_downloads: {
+    key: 'release_downloads',
+    label: 'Release Downloads',
+    category: 'releases',
+    type: 'number',
+    defaultEnabled: true
   },
 
   // Info fields
@@ -199,6 +208,19 @@ export function getDefaultEnabledFields() {
 }
 
 /**
+ * Order enabled fields by the same registry order used on the options page.
+ * @param {string[]} enabledFields
+ * @returns {string[]} Enabled field keys in display order
+ */
+export function getOrderedEnabledFields(enabledFields) {
+  const enabledSet = new Set(Array.isArray(enabledFields) ? enabledFields : []);
+
+  return Object.values(FIELD_REGISTRY)
+    .filter(field => enabledSet.has(field.key))
+    .map(field => field.key);
+}
+
+/**
  * Get fields grouped by category
  * @returns {Object} Categories with their fields
  */
@@ -206,6 +228,7 @@ export function getFieldsByCategory() {
   const categories = {
     dates: [],
     metrics: [],
+    releases: [],
     info: [],
     flags: []
   };

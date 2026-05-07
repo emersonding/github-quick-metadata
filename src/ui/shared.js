@@ -3,9 +3,63 @@
  * Extracts common code to eliminate duplication
  */
 
-import { fetchRepoMetadata } from '../core/api.js';
+import {
+  fetchReleaseDownloadStatsWithRateLimit,
+  fetchRepoMetadata,
+  fetchRepoMetadataWithRateLimit
+} from '../core/api.js';
 import { cacheGet, cacheSet, buildCacheKey } from '../core/cache.js';
 import { createElement } from '../utils/dom.js';
+
+const RELEASE_DOWNLOADS_FIELD = 'release_downloads';
+
+/**
+ * Check whether release download stats are needed for a field list.
+ * @param {string[]} enabledFields
+ * @returns {boolean}
+ */
+function needsReleaseDownloads(enabledFields) {
+  return Array.isArray(enabledFields) && enabledFields.includes(RELEASE_DOWNLOADS_FIELD);
+}
+
+export function isReleaseField(fieldKey) {
+  return fieldKey === RELEASE_DOWNLOADS_FIELD;
+}
+
+export function hasReleaseFields(enabledFields) {
+  return needsReleaseDownloads(enabledFields);
+}
+
+/**
+ * Fetch cached release download stats or request them from GitHub.
+ * @param {string} owner
+ * @param {string} repo
+ * @returns {Promise<{data: object, rateLimit: object|null}>}
+ */
+export async function fetchReleaseDownloadStatsWithCache(owner, repo) {
+  const cacheKey = buildCacheKey(owner, repo, 'release_downloads');
+  const cached = cacheGet(cacheKey);
+
+  if (cached) {
+    return { data: cached, rateLimit: null };
+  }
+
+  const result = await fetchReleaseDownloadStatsWithRateLimit(owner, repo);
+  cacheSet(cacheKey, result.data);
+  return result;
+}
+
+/**
+ * Fetch repository metadata from GitHub, falling back to cache on failure.
+ * @param {string} owner
+ * @param {string} repo
+ * @returns {Promise<{data: object, rateLimit: object|null}>}
+ */
+export async function fetchBaseRepoMetadata(owner, repo) {
+  return fetchRepoMetadataWithRateLimit(owner, repo).catch(() => {
+    return fetchRepoMetadataWithCache(owner, repo);
+  });
+}
 
 /**
  * Fetch repository metadata with caching
@@ -96,7 +150,7 @@ export function createErrorState(message, onRetry) {
  */
 export function createMetaItem(label, value, mutedValue) {
   const item = createElement('div', { className: 'gqm-meta-item' }, [
-    createElement('div', { className: 'gqm-meta-label', textContent: label })
+    createElement('div', { className: 'gqm-meta-label', textContent: `${label}:` })
   ]);
 
   const valueContainer = createElement('div', { className: 'gqm-meta-value' });
@@ -113,6 +167,30 @@ export function createMetaItem(label, value, mutedValue) {
 
   item.appendChild(valueContainer);
   return item;
+}
+
+/**
+ * Update an existing metadata item value.
+ * @param {HTMLElement} item
+ * @param {{ primary: string, secondary?: string }} formattedValue
+ */
+export function updateMetaItem(item, formattedValue) {
+  if (!item || !formattedValue) return;
+
+  const valueContainer = item.querySelector('.gqm-meta-value');
+  if (!valueContainer) return;
+
+  valueContainer.innerHTML = '';
+
+  if (formattedValue.secondary) {
+    valueContainer.appendChild(createElement('div', { textContent: formattedValue.primary }));
+    valueContainer.appendChild(createElement('div', {
+      className: 'gqm-meta-value-muted',
+      textContent: formattedValue.secondary
+    }));
+  } else {
+    valueContainer.textContent = formattedValue.primary;
+  }
 }
 
 /**
