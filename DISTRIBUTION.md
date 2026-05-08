@@ -127,18 +127,16 @@ All version numbers must match across:
 
 ## Icon Verification
 
-Icons are generated via `npm run build:icons` using `scripts/create-simple-icons.js`.
+Icons are stored as static PNG files in `assets/icons/` and copied into each extension build via `npm run build:icons`.
 
-### Current Implementation (MVP)
-- [x] All icons created from base 16x16 PNG (scaled for larger sizes)
-- [x] GitHub blue color (#0969da) with "GH" text
-- [x] Suitable for MVP release
+### Current Implementation
+- [x] Static 16x16, 48x48, and 128x128 PNG files committed in `assets/icons/`
+- [x] Original document/info-badge artwork
+- [x] 8-bit RGBA PNG output for Chrome/Firefox compatibility
 
 ### Production Recommendation
 For production release, consider:
-- [ ] Create proper 48x48 and 128x128 PNG files (not scaled)
-- [ ] Use a professional icon design tool or hire a designer
-- [ ] Ensure icons are crisp at all sizes
+- [ ] Update `assets/icons/` only when the logo changes
 - [ ] Test icon appearance on light and dark backgrounds
 
 ## Distribution Package Creation
