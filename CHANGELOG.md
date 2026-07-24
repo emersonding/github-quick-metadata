@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-07-23
+
+### Fixed
+
+- **About section detection** — The extension stopped injecting metadata on
+  repository pages (`About section not found after retries`) after GitHub
+  migrated the repo sidebar to its Primer / CSS-modules layout, removing the
+  `BorderGrid` / `h2.h4.mb-3` markup the detector relied on. `findAboutSection()`
+  now locates the section by its "About" heading text and the stable
+  `SidebarSection-module__sidebarSection` container, with the legacy markup kept
+  as a fallback. Verified live against the new GitHub layout.
+
+### Changed
+
+- Manifest and userscript versions are now sourced from `package.json` in the
+  Rollup build, so they can no longer drift out of sync.
+
 ## [1.0.0] - 2026-04-09
 
 ### Added
@@ -72,4 +89,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parallel API requests for faster initial load
 - Cached data displayed instantly while fresh data loads in background
 
+[2.1.2]: https://github.com/your-username/github-quick-metadata/releases/tag/v2.1.2
 [1.0.0]: https://github.com/your-username/github-quick-metadata/releases/tag/v1.0.0

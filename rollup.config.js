@@ -8,6 +8,10 @@ import path from 'path';
 const TARGET = process.env.TARGET || 'chrome';
 const isProd = process.env.NODE_ENV === 'production';
 
+// Single source of truth for the version - keep manifests and the userscript
+// banner in sync with package.json so they can never drift apart.
+const { version: VERSION } = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+
 const basePlugins = [
   css(),
   resolve({ browser: true }),
@@ -42,7 +46,7 @@ const copyStaticFiles = (target) => ({
     const manifest = target === 'firefox' ? {
       manifest_version: 2,
       name: 'GitHub Quick Metadata',
-      version: '2.1.1',
+      version: VERSION,
       description: 'Display GitHub repository metadata including creation date, update time, and customizable fields directly in the About section',
       author: 'github-quick-metadata',
       homepage_url: 'https://github.com/your-username/github-quick-metadata',
@@ -86,7 +90,7 @@ const copyStaticFiles = (target) => ({
     } : {
       manifest_version: 3,
       name: 'GitHub Quick Metadata',
-      version: '2.1.1',
+      version: VERSION,
       description: 'Display GitHub repository metadata including creation date, update time, and customizable fields directly in the About section',
       author: 'github-quick-metadata',
       homepage_url: 'https://github.com/your-username/github-quick-metadata',
@@ -192,7 +196,7 @@ const firefoxConfig = [
 const userscriptBanner = `// ==UserScript==
 // @name         GitHub Quick Metadata
 // @namespace    https://github.com/
-// @version      2.1.1
+// @version      ${VERSION}
 // @description  Display GitHub repository metadata including creation date, update time, and customizable fields
 // @author       github-quick-metadata
 // @match        https://github.com/*/*
