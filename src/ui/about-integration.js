@@ -24,36 +24,52 @@ import {
  * @returns {HTMLElement|null}
  */
 function findAboutSection() {
-  // GitHub's About section is typically in the right sidebar
-  // Try multiple selectors for robustness across GitHub UI updates
+  // GitHub's About section lives in the right sidebar. Its markup has changed
+  // several times, so locate it by the "About" heading rather than by any
+  // specific (and frequently re-hashed) container class name.
 
-  // Modern GitHub layout - look for the About section heading
-  let aboutSection = document.querySelector('h2.h4.mb-3');
-  if (aboutSection && aboutSection.textContent.trim() === 'About') {
-    return aboutSection.closest('.BorderGrid-cell');
-  }
-
-  // Alternative: look for the sidebar with specific attributes
-  const sidebar = document.querySelector('div[class*="Layout-sidebar"]');
-  if (sidebar) {
-    const aboutHeading = Array.from(sidebar.querySelectorAll('h2')).find(
-      h => h.textContent.trim() === 'About'
-    );
-    if (aboutHeading) {
-      return aboutHeading.closest('.BorderGrid-cell') || aboutHeading.parentElement;
+  // 1. Primer / CSS-modules layout (current GitHub, 2024+).
+  //    <div class="SidebarSection-module__sidebarSection...">
+  //      <h2 data-component="Heading"><span>About</span></h2> ...
+  const aboutHeading = findAboutHeading();
+  if (aboutHeading) {
+    const section =
+      aboutHeading.closest('[class*="SidebarSection-module__sidebarSection"]') ||
+      aboutHeading.closest('.BorderGrid-cell') ||
+      aboutHeading.parentElement;
+    if (section) {
+      return section;
     }
   }
 
-  // Fallback: look for the container with repo metadata
+  // 2. Legacy layout fallback - container with repo metadata.
   const metaContainer = document.querySelector('.BorderGrid-row .BorderGrid-cell:last-child');
-  if (metaContainer) {
-    const hasAboutContent = metaContainer.querySelector('p[class*="f4"]');
-    if (hasAboutContent) {
-      return metaContainer;
-    }
+  if (metaContainer && metaContainer.querySelector('p[class*="f4"]')) {
+    return metaContainer;
   }
 
   return null;
+}
+
+/**
+ * Locate the "About" section heading regardless of GitHub's current markup.
+ * @returns {HTMLElement|null}
+ */
+function findAboutHeading() {
+  const headings = document.querySelectorAll(
+    'h2[data-component="Heading"], h2.h4, [class*="SidebarSection-module__sectionHeading"]'
+  );
+  const heading = Array.from(headings).find(h => h.textContent.trim() === 'About');
+  if (heading) {
+    return heading;
+  }
+
+  // Last-resort scan of every sidebar heading.
+  return (
+    Array.from(document.querySelectorAll('h2, h3')).find(
+      h => h.textContent.trim() === 'About'
+    ) || null
+  );
 }
 
 /**
