@@ -192,12 +192,17 @@ npm run build:chrome      # Chrome extension → dist/chrome/
 npm run build:firefox     # Firefox extension → dist/firefox/
 npm run build:userscript  # Userscript → dist/userscript/
 
+# Package Chrome Web Store upload ZIP
+npm run package:chrome    # Creates dist/github-quick-metadata-chrome-v<version>.zip
+
 # Development mode (watch for changes)
 npm run dev
 
 # Lint code
 npm run lint
 ```
+
+`npm run package:chrome` builds the Chrome target, copies icons, removes old package ZIPs from `dist/`, and creates a Chrome Web Store-ready ZIP with `manifest.json` at the archive root.
 
 ### Project Structure
 
