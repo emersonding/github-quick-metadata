@@ -56,19 +56,25 @@ function findAboutSection() {
  * @returns {HTMLElement|null}
  */
 function findAboutHeading() {
-  const headings = document.querySelectorAll(
+  const isAbout = h => h.textContent.trim() === 'About';
+  let candidates = Array.from(document.querySelectorAll(
     'h2[data-component="Heading"], h2.h4, [class*="SidebarSection-module__sectionHeading"]'
-  );
-  const heading = Array.from(headings).find(h => h.textContent.trim() === 'About');
-  if (heading) {
-    return heading;
-  }
+  )).filter(isAbout);
 
   // Last-resort scan of every sidebar heading.
+  if (candidates.length === 0) {
+    candidates = Array.from(document.querySelectorAll('h2, h3')).filter(isAbout);
+  }
+
+  // GitHub renders a second copy of the About section in a narrow-viewport
+  // header (CodeViewHeader-module__NarrowOnly) that is hidden on desktop.
+  // Prefer the currently visible copy, then any copy outside the narrow-only
+  // header, so metadata is injected where the user can see it.
   return (
-    Array.from(document.querySelectorAll('h2, h3')).find(
-      h => h.textContent.trim() === 'About'
-    ) || null
+    candidates.find(h => h.getClientRects().length > 0) ||
+    candidates.find(h => !h.closest('[class*="NarrowOnly"]')) ||
+    candidates[0] ||
+    null
   );
 }
 
