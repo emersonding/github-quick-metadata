@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.3] - 2026-10-10
+
+### Fixed
+
+- **Metadata hidden on desktop** — GitHub now renders the About section twice:
+  a narrow-viewport copy (`CodeViewHeader-module__NarrowOnly`, hidden on
+  desktop) ahead of the visible sidebar copy. The detector matched the first,
+  so metadata was rendered into an invisible container. `findAboutHeading()`
+  now prefers the visible About heading, falling back to any copy outside the
+  narrow-only header. Verified live in Chrome on github.com/facebook/react.
+
+### Added
+
+- `npm run package:chrome` builds and zips `dist/chrome` into a Chrome Web
+  Store–ready archive.
+
 ## [2.1.2] - 2026-07-23
 
 ### Fixed
